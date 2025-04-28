@@ -398,3 +398,253 @@ class _QuizPageState extends State<QuizPage> with SingleTickerProviderStateMixin
     );
   }
 }
+/*********************************************************************************************************************/
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'EasyExams',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: const LandingPage(),
+    );
+  }
+}
+
+class LandingPage extends StatelessWidget {
+  const LandingPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('EasyExams'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Welcome to EasyExams!',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Test your knowledge with our True/False quiz',
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const QuizPage()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+              ),
+              child: const Text(
+                'Start Exam',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class QuizPage extends StatefulWidget {
+  const QuizPage({super.key});
+
+  @override
+  State<QuizPage> createState() => _QuizPageState();
+}
+
+class _QuizPageState extends State<QuizPage> {
+  int _currentQuestionIndex = 0;
+  int _score = 0;
+  bool _quizCompleted = false;
+
+  final List<Map<String, dynamic>> _questions = [
+    {
+      'question': 'Flutter was developed by Google.',
+      'answer': true,
+    },
+    {
+      'question': 'Dart is a strongly typed programming language.',
+      'answer': true,
+    },
+    {
+      'question': 'Flutter can only be used to develop mobile applications.',
+      'answer': false,
+    },
+    {
+      'question': 'StatelessWidget can maintain state information.',
+      'answer': false,
+    },
+    {
+      'question': 'Hot Reload preserves the app state in Flutter development.',
+      'answer': true,
+    },
+  ];
+
+  void _checkAnswer(bool userAnswer) {
+    final bool correctAnswer = _questions[_currentQuestionIndex]['answer'];
+    
+    if (userAnswer == correctAnswer) {
+      setState(() {
+        _score++;
+      });
+    }
+
+    if (_currentQuestionIndex < _questions.length - 1) {
+      setState(() {
+        _currentQuestionIndex++;
+      });
+    } else {
+      setState(() {
+        _quizCompleted = true;
+      });
+    }
+  }
+
+  void _restartQuiz() {
+    setState(() {
+      _currentQuestionIndex = 0;
+      _score = 0;
+      _quizCompleted = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Quiz'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: _quizCompleted
+            ? _buildResultScreen()
+            : _buildQuestionScreen(),
+      ),
+    );
+  }
+
+  Widget _buildQuestionScreen() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Question ${_currentQuestionIndex + 1} of ${_questions.length}',
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 20),
+        Card(
+          elevation: 4,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              _questions[_currentQuestionIndex]['question'],
+              style: const TextStyle(fontSize: 22),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        const SizedBox(height: 40),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            ElevatedButton(
+              onPressed: () => _checkAnswer(true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+              ),
+              child: const Text(
+                'True',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => _checkAnswer(false),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+              ),
+              child: const Text(
+                'False',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildResultScreen() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Quiz Completed!',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Your Score: $_score out of ${_questions.length}',
+            style: const TextStyle(fontSize: 22),
+          ),
+          const SizedBox(height: 40),
+          ElevatedButton(
+            onPressed: _restartQuiz,
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+            ),
+            child: const Text(
+              'Restart Quiz',
+              style: TextStyle(fontSize: 18),
+            ),
+          ),
+          const SizedBox(height: 20),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text(
+              'Back to Home',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
