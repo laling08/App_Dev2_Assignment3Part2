@@ -671,3 +671,203 @@ class ResultsPage extends StatelessWidget {
     );
   }
 }
+
+/***********************************************************************************/
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'BMI Calculator',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: const BMICalculator(),
+    );
+  }
+}
+
+class BMICalculator extends StatefulWidget {
+  const BMICalculator({super.key});
+
+  @override
+  State<BMICalculator> createState() => _BMICalculatorState();
+}
+
+class _BMICalculatorState extends State<BMICalculator> {
+  final TextEditingController _ageController = TextEditingController();
+  final TextEditingController _weightController = TextEditingController();
+  final TextEditingController _heightController = TextEditingController();
+  String _gender = 'Male';
+  double _bmi = 0;
+  String _healthStatus = '';
+  bool _hasCalculated = false;
+
+  void _calculateBMI() {
+    if (_weightController.text.isEmpty || _heightController.text.isEmpty) {
+      return;
+    }
+
+    final double weight = double.parse(_weightController.text);
+    final double height = double.parse(_heightController.text) / 100; // Convert cm to m
+
+    setState(() {
+      _bmi = weight / (height * height);
+      _hasCalculated = true;
+
+      if (_bmi < 18.5) {
+        _healthStatus = 'Underweight - Eat more nutritious food';
+      } else if (_bmi >= 18.5 && _bmi < 25) {
+        _healthStatus = 'Healthy - Great Shape..!';
+      } else if (_bmi >= 25 && _bmi < 30) {
+        _healthStatus = 'Overweight - Exercise more';
+      } else {
+        _healthStatus = 'Obese - Consult a doctor';
+      }
+    });
+  }
+
+  void _resetFields() {
+    _ageController.clear();
+    _weightController.clear();
+    _heightController.clear();
+    setState(() {
+      _gender = 'Male';
+      _bmi = 0;
+      _healthStatus = '';
+      _hasCalculated = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _ageController.dispose();
+    _weightController.dispose();
+    _heightController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('BMI Calculator'),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            TextField(
+              controller: _ageController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Age',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<String>(
+              value: _gender,
+              decoration: const InputDecoration(
+                labelText: 'Gender',
+                border: OutlineInputBorder(),
+              ),
+              items: ['Male', 'Female', 'Other']
+                  .map((label) => DropdownMenuItem(
+                value: label,
+                child: Text(label),
+              ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _gender = value!;
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _weightController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Weight (kg)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _heightController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Height (cm)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _calculateBMI,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text('Calculate BMI'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _resetFields,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: Colors.red,
+                    ),
+                    child: const Text('Reset'),
+                  ),
+                ),
+              ],
+            ),
+            if (_hasCalculated) ...[
+              const SizedBox(height: 32),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Your BMI: ${_bmi.toStringAsFixed(1)}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _healthStatus,
+                      style: const TextStyle(
+                        fontSize: 18,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
